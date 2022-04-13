@@ -50,6 +50,7 @@ func main() {
 		ChartVersion: "9.4.2",
 		ReleaseName:  releaseName,
 		Values:       make(map[string]interface{}),
+		ValuesFile:   "",
 	}
 	rel, err = helmClient.InstallChart(chartConfig)
 	fmt.Println(rel)

@@ -30,6 +30,7 @@ func (cluster *Cluster) GetK8sConfig(logger logger.Logger) genericclioptions.RES
 	if err != nil {
 		fmt.Println(err)
 	}
+	restConf.Insecure = true
 
 	return cluster.newRestClientGetter(restConf)
 }

@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io/ioutil"
 	"net/http"
+	"os"
 	"strings"
 
 	"helm.sh/helm/v3/pkg/chart"
@@ -63,6 +64,15 @@ func GetChart(chartUrl string, chartName string, version string) (*chart.Chart, 
 	}
 
 	return chartloader.LoadArchive(bytes.NewReader(chartContent))
+}
+
+func GetChartFromZip(chartUrl string) (*chart.Chart, error) {
+	body, err := os.ReadFile(chartUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	return chartloader.LoadArchive(bytes.NewReader(body))
 }
 
 func GetIndexFile(chartUrl string) (*repo.IndexFile, error) {

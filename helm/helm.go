@@ -6,6 +6,7 @@ import (
 	"github.com/MiteshSharma/go-helm/chart"
 	"github.com/MiteshSharma/go-helm/logger"
 	"helm.sh/helm/v3/pkg/action"
+	"helm.sh/helm/v3/pkg/chartutil"
 	"helm.sh/helm/v3/pkg/release"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 )
@@ -22,6 +23,7 @@ type InstallChartConfig struct {
 	ChartVersion string
 	ReleaseName  string
 	Values       map[string]interface{}
+	ValuesFile   string
 }
 
 type UpgradeChartConfig struct {
@@ -69,6 +71,30 @@ func (h *Helm) InstallChart(chartDetail InstallChartConfig) (*release.Release, e
 	}
 
 	return cmd.Run(chart, chartDetail.Values)
+}
+
+func (h *Helm) InstallChartFromLocal(chartDetail InstallChartConfig) (*release.Release, error) {
+	actionConfig := h.GetActionConfig()
+	cmd := action.NewInstall(actionConfig)
+
+	cmd.Namespace = h.Namespace
+	cmd.Timeout = 300
+	cmd.ReleaseName = chartDetail.ReleaseName
+
+	chart, err := chart.GetChartFromZip(chartDetail.ChartUrl)
+	if err != nil {
+		return nil, err
+	}
+
+	values := chartDetail.Values
+	if chartDetail.ValuesFile != "" {
+		values, err = chartutil.ReadValuesFile(chartDetail.ValuesFile)
+		if err != nil {
+			values = chartDetail.Values
+		}
+	}
+
+	return cmd.Run(chart, values)
 }
 
 func (h *Helm) UpgradeChart(chartDetail UpgradeChartConfig) (*release.Release, error) {
